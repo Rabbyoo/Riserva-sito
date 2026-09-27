@@ -40,7 +40,8 @@ const log = (...a) => console.log(...a);
 // 1. Dati
 // -----------------------------------------------------------------------------
 async function rpc(nome, corpo) {
-  const url = process.env.SUPABASE_URL?.replace(/\/$/, '');
+  // Accetta sia "https://xxx.supabase.co" sia "https://xxx.supabase.co/rest/v1/"
+  const url = process.env.SUPABASE_URL?.trim().replace(/\/+$/, '').replace(/\/rest\/v1$/, '');
   const chiave = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !chiave) throw new Error('Mancano SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY (o DATI_FILE per una prova)');
   for (let tentativo = 1; ; tentativo++) {
@@ -50,10 +51,14 @@ async function rpc(nome, corpo) {
         headers: { apikey: chiave, Authorization: `Bearer ${chiave}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(corpo),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}: ${(await res.text()).slice(0, 300)}`);
+      if (!res.ok) {
+        const e = new Error(`HTTP ${res.status}: ${(await res.text()).slice(0, 300)}`);
+        e.definitivo = res.status >= 400 && res.status < 500 && res.status !== 408 && res.status !== 429;
+        throw e;
+      }
       return await res.json();
     } catch (e) {
-      if (tentativo >= 4) throw e;
+      if (e.definitivo || tentativo >= 4) throw e;
       log(`⚠️  ${e.message} — nuovo tentativo tra ${tentativo * 5}s`);
       await new Promise((r) => setTimeout(r, tentativo * 5000));
     }
