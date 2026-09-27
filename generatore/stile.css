@@ -1,0 +1,153 @@
+@font-face { font-family: "Figtree"; src: url("/font/Figtree-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+  @font-face { font-family: "Figtree"; src: url("/font/Figtree-600.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+  @font-face { font-family: "Figtree"; src: url("/font/Figtree-700.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+  @font-face { font-family: "Figtree"; src: url("/font/Figtree-800.woff2") format("woff2"); font-weight: 800; font-display: swap; }
+  @font-face { font-family: "Bricolage Grotesque"; src: url("/font/BricolageGrotesque-800.woff2") format("woff2"); font-weight: 800; font-display: swap; }
+
+  :root {
+    --bg: #F5F6FA; --surface: #FFFFFF; --text: #161B30; --muted: #56607D; --line: #E2E5EE;
+    --accent-text: #8A5200; --chip: #FFF1CC; --chip-text: #3D2A00; --navy: #121A33;
+    --ambra: #FFB020; --ambra-chiara: #FFC24D; --verde: #1B7F46; --verde-bg: #E3F4EA;
+    --arancio: #A55200; --rosso-prezzo: #B3261E; --riga: #F8F9FC;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0D1222; --surface: #151B30; --text: #EEF1F8; --muted: #A9B0C8; --line: #263050;
+      --accent-text: #FFC24D; --chip: #3A2F14; --chip-text: #FFE7B0; --verde: #5FD08E; --verde-bg: #173427;
+      --arancio: #FFB36B; --rosso-prezzo: #FF8A80; --riga: #18203A; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0D1222; --surface: #151B30; --text: #EEF1F8; --muted: #A9B0C8; --line: #263050;
+    --accent-text: #FFC24D; --chip: #3A2F14; --chip-text: #FFE7B0; --verde: #5FD08E; --verde-bg: #173427;
+    --arancio: #FFB36B; --rosso-prezzo: #FF8A80; --riga: #18203A; color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 17px/1.55 "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  a { color: var(--accent-text); }
+  a:focus-visible, summary:focus-visible { outline: 3px solid var(--ambra); outline-offset: 3px; border-radius: 6px; }
+  .contenitore { max-width: 920px; margin: 0 auto; padding-inline: 16px; }
+  h1, h2, h3 { text-wrap: balance; margin: 0; }
+  .titolo { font-family: "Bricolage Grotesque", "Figtree", system-ui, sans-serif; font-weight: 800; letter-spacing: -0.02em; }
+  .num { font-variant-numeric: tabular-nums; }
+
+  .esempio-non-usato { background: #FFE7B0; color: #3D2A00; text-align: center; font-weight: 700; font-size: 14px; padding: 6px 12px; }
+
+  /* Intestazione */
+  .testata { background: var(--navy); color: #fff; }
+  .testata .contenitore { display: flex; align-items: center; gap: 12px; min-height: 60px; }
+  .marchio { display: flex; align-items: center; gap: 10px; color: #fff; text-decoration: none; }
+  .marchio span { font-family: "Bricolage Grotesque", "Figtree", sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.5px; }
+  .scarica-mini { margin-left: auto; background: var(--ambra); color: #1A1300; text-decoration: none; font-weight: 800;
+    font-size: 15px; padding: 8px 14px; border-radius: 999px; white-space: nowrap; }
+
+  /* Apertura */
+  .apertura { background: var(--navy); color: #fff; padding: 8px 0 28px; }
+  .briciole { font-size: 14px; color: #A9B0C8; margin: 0 0 14px; }
+  .briciole a { color: #D7DCEB; text-decoration: none; }
+  .briciole a:hover { color: var(--ambra-chiara); }
+  .apertura h1 { font-size: clamp(30px, 6.5vw, 48px); line-height: 1.05; }
+  .apertura h1 em { font-style: normal; color: var(--ambra); }
+  .aggiornato { margin: 12px 0 0; color: #C9D0E4; font-size: 15px; display: flex; flex-wrap: wrap; gap: 4px 14px; }
+  .aggiornato span { display: inline-flex; align-items: center; gap: 6px; }
+
+  /* Riepilogo per carburante */
+  .riepilogo { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: -16px; }
+  .scheda { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; }
+  .carb { padding: 14px 14px 12px; text-decoration: none; color: inherit; display: block; }
+  .carb small { display: block; color: var(--muted); font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; }
+  .carb b { display: block; font-size: 28px; font-weight: 800; line-height: 1.15; margin-top: 2px; }
+  .carb b i { font-style: normal; font-size: 14px; font-weight: 700; color: var(--muted); }
+  .carb .confronto { margin-top: 6px; font-size: 13.5px; font-weight: 700; line-height: 1.3; }
+  .giu { color: var(--verde); } .su { color: var(--rosso-prezzo); }
+  .carb .media { font-size: 13.5px; color: var(--muted); }
+
+  main { padding-block: 24px 40px; }
+  section { margin-top: 30px; }
+  h2 { font-size: 24px; }
+  h2 + p { margin: 4px 0 0; color: var(--muted); font-size: 15px; }
+
+  /* Elenco distributori */
+  .elenco { list-style: none; margin: 14px 0 0; padding: 0; overflow: hidden; }
+  .elenco li { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 4px 12px; align-items: center;
+    padding: 12px 14px; border-top: 1px solid var(--line); }
+  .elenco li:first-child { border-top: 0; background: var(--verde-bg); }
+  .pos { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 14px;
+    background: var(--riga); color: var(--muted); }
+  .elenco li:first-child .pos { background: var(--verde); color: #fff; }
+  .nome { font-weight: 700; display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .nome span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .marca { flex-shrink: 0; font-size: 11px; font-weight: 800; letter-spacing: .02em; padding: 2px 6px; border-radius: 5px;
+    background: var(--chip); color: var(--chip-text); }
+  .dove { grid-column: 2; font-size: 14px; color: var(--muted); line-height: 1.35; }
+  .prezzo { grid-row: 1 / span 2; grid-column: 3; text-align: right; }
+  .prezzo b { display: block; font-size: 22px; font-weight: 800; line-height: 1.1; }
+  .prezzo small { font-size: 12.5px; color: var(--muted); font-weight: 600; }
+  .elenco li:first-child .prezzo b { color: var(--verde); }
+  .altri { margin: 10px 2px 0; font-size: 15px; }
+
+  details.scheda { margin-top: 12px; }
+  details.scheda > summary { cursor: pointer; list-style: none; padding: 14px 16px; font-weight: 800; font-size: 18px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  details.scheda > summary::-webkit-details-marker { display: none; }
+  details.scheda > summary .da { font-size: 15px; font-weight: 700; color: var(--muted); }
+  details.scheda > summary::after { content: "▾"; color: var(--muted); transition: transform .2s; }
+  details[open].scheda > summary::after { transform: rotate(180deg); }
+  details.scheda .elenco { margin: 0; border-top: 1px solid var(--line); }
+
+  /* Invito all'app */
+  .app { background: var(--navy); color: #fff; border-radius: 20px; padding: 22px; display: grid;
+    grid-template-columns: minmax(0, 1fr) auto; gap: 18px; align-items: center; }
+  .app h2 { font-size: 24px; color: #fff; }
+  .app h2 em { font-style: normal; color: var(--ambra); }
+  .app p { margin: 8px 0 0; color: #C9D0E4; font-size: 16px; }
+  .store { display: flex; flex-direction: column; gap: 10px; }
+  .store a { display: inline-flex; flex-direction: column; justify-content: center; min-height: 52px; padding: 6px 18px;
+    border-radius: 14px; border: 1.5px solid #3A4670; color: #fff; text-decoration: none; line-height: 1.2; }
+  .store a:first-child { background: var(--ambra); color: #1A1300; border-color: var(--ambra); }
+  .store small { font-size: 12px; font-weight: 600; opacity: .8; }
+  .store b { font-size: 17px; }
+
+  /* Comuni vicini */
+  .vicini { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .vicini a { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 7px 14px;
+    text-decoration: none; color: var(--text); font-weight: 600; font-size: 15px; }
+  .vicini a span { color: var(--muted); font-weight: 400; }
+  .vicini a:hover { border-color: var(--ambra); }
+
+  /* Domande */
+  .domande details { border-top: 1px solid var(--line); padding: 12px 2px; }
+  .domande details:first-of-type { border-top: 0; }
+  .domande summary { cursor: pointer; font-weight: 700; }
+  .domande p { margin: 8px 0 0; color: var(--muted); }
+
+  .piede { border-top: 1px solid var(--line); padding: 20px 0 32px; color: var(--muted); font-size: 14px; }
+  .piede nav { display: flex; gap: 16px; margin-top: 8px; }
+
+  @media (max-width: 720px) {
+    .riepilogo { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .app { grid-template-columns: 1fr; }
+    .store { flex-direction: row; flex-wrap: wrap; }
+    .store a { flex: 1 1 140px; }
+  }
+
+  /* Elenchi di comuni e province */
+  .tabella { margin-top: 14px; overflow: hidden; }
+  .tabella .intestazione, .tabella a { display: grid; grid-template-columns: minmax(0, 1fr) 82px 82px; gap: 8px;
+    align-items: center; padding: 11px 14px; border-top: 1px solid var(--line); }
+  .tabella .intestazione { border-top: 0; font-size: 12.5px; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .04em; background: var(--riga); }
+  .tabella a { text-decoration: none; color: var(--text); }
+  .tabella a:hover { background: var(--riga); }
+  .tabella a b { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tabella a b small { font-weight: 400; color: var(--muted); font-size: 13px; }
+  .tabella .num { text-align: right; font-weight: 700; }
+  .tabella .intestazione span + span { text-align: right; }
+  .vuoto { color: var(--muted); font-weight: 400 !important; }
+  .nota { margin: 10px 2px 0; color: var(--muted); font-size: 14px; }
+  @media (max-width: 420px) {
+    .tabella .intestazione, .tabella a { grid-template-columns: minmax(0, 1fr) 64px 64px; padding-inline: 12px; }
+  }

@@ -1,0 +1,66 @@
+# =============================================================================
+#  Pubblicazione del sito riservapp.it con le pagine "Prezzi oggi a <comune>"
+# =============================================================================
+#  Due volte al giorno, mezz'ora dopo l'aggiornamento dei prezzi (repository
+#  dell'app, "Sync prezzi MIMIT"), e a ogni modifica dei file del sito:
+#    1. il generatore crea le pagine di comuni, province e regioni + sitemap
+#    2. GitHub pubblica tutto su riservapp.it
+#  Se i dati non arrivano o sono incompleti il lavoro si ferma e il sito resta
+#  com'era.
+#
+#  Secrets (Settings → Secrets and variables → Actions), gli stessi del
+#  repository dell'app:
+#    SUPABASE_URL               → https://<progetto>.supabase.co
+#    SUPABASE_SERVICE_ROLE_KEY  → chiave segreta (sb_secret_... o service_role)
+#  Facoltativi, quando l'app sarà negli store (Variables, non Secrets):
+#    URL_GOOGLE_PLAY, URL_APP_STORE
+#
+#  Impostazione una tantum: Settings → Pages → Source: "GitHub Actions".
+# =============================================================================
+name: Pubblica sito e pagine prezzi
+
+on:
+  schedule:
+    - cron: '50 6 * * *'    # 08:50 ora italiana (estate) / 07:50 (inverno)
+    - cron: '50 13 * * *'   # 15:50 / 14:50
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  pubblica:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: github-pages
+      url: ${{ steps.pubblica.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Genera le pagine dei prezzi
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          URL_GOOGLE_PLAY: ${{ vars.URL_GOOGLE_PLAY }}
+          URL_APP_STORE: ${{ vars.URL_APP_STORE }}
+        run: node generatore/genera.mjs
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+      - id: pubblica
+        uses: actions/deploy-pages@v4
