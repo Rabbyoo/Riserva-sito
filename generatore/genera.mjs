@@ -34,6 +34,12 @@ const URL_PLAY = process.env.URL_GOOGLE_PLAY || '';
 const URL_APPSTORE = process.env.URL_APP_STORE || '';
 const MIN_COMUNI = Number(process.env.MIN_COMUNI ?? 1000);
 
+/** Comuni extradoganali: il carburante costa molto meno per legge. */
+const ZONE_FRANCHE = new Set(['LIVIGNO']);
+
+/** Sulle pagine si usano solo prezzi comunicati negli ultimi 14 giorni. */
+const GIORNI_MAX = 14;
+
 const log = (...a) => console.log(...a);
 
 // -----------------------------------------------------------------------------
@@ -96,6 +102,9 @@ function preparaStazioni(grezze) {
     for (const [tipo, self, p, dt] of s.pr ?? []) {
       const k = chiaveVoce(tipo, self);
       const v = { prezzo: Number(p), dt: new Date(dt), self };
+      // prezzo non aggiornato da troppo tempo: con i prezzi che cambiano
+      // (rincari, accise) sarebbe fuorviante
+      if (Date.now() - v.dt.getTime() > GIORNI_MAX * 86400000) continue;
       const prima = prezzi[k];
       if (!prima || v.prezzo < prima.prezzo || (v.prezzo === prima.prezzo && v.dt > prima.dt)) prezzi[k] = v;
     }
@@ -108,22 +117,34 @@ function preparaStazioni(grezze) {
 }
 
 /**
- * Scarta i prezzi palesemente sbagliati (errori di battitura dei gestori):
- * sotto il 70% o sopra il 150% del prezzo mediano italiano di quella voce.
- * Così un "0,169" non compare mai come il più economico.
+ * Scarta i prezzi inaffidabili, così non compaiono mai come "il più economico":
+ *  • errori dei gestori: più del 15% sotto la mediana italiana della stessa voce
+ *    (20% per GPL e metano, che variano di più) o più del 25% sopra.
+ *    Esempio: con il diesel self a 2,36 di mediana, sotto 2,00 si scarta.
+ *  • Livigno è esclusa dal controllo: è zona extradoganale e lì il carburante
+ *    costa davvero molto meno.
+ * I prezzi più vecchi di GIORNI_MAX sono già esclusi in preparaStazioni().
  */
 function scartaAnomali(stazioni) {
+  const esenti = ZONE_FRANCHE;
   let scartati = 0;
   for (const voce of Object.keys(VOCI)) {
-    const valori = stazioni.filter((s) => s.prezzi[voce]).map((s) => s.prezzi[voce].prezzo).sort((a, b) => a - b);
+    const valori = stazioni.filter((s) => s.prezzi[voce] && !esenti.has(s.comuneMimit))
+      .map((s) => s.prezzi[voce].prezzo).sort((a, b) => a - b);
     if (valori.length < 20) continue;
     const mediana = valori[Math.floor(valori.length / 2)];
+    const sotto = voce === 'gpl' || voce === 'metano' ? 0.80 : 0.85;
+    const min = mediana * sotto, max = mediana * 1.25;
+    let qui = 0;
     for (const s of stazioni) {
       const p = s.prezzi[voce];
-      if (p && (p.prezzo < mediana * 0.7 || p.prezzo > mediana * 1.5)) { delete s.prezzi[voce]; scartati++; }
+      if (!p || esenti.has(s.comuneMimit)) continue;
+      if (p.prezzo < min || p.prezzo > max) { delete s.prezzi[voce]; qui++; }
     }
+    if (qui) log(`🧹 ${VOCI[voce].nome}: mediana ${prezzo(mediana)}, accettati ${prezzo(min)}–${prezzo(max)}, scartati ${qui}`);
+    scartati += qui;
   }
-  if (scartati) log(`🧹 ${scartati} prezzi anomali scartati`);
+  if (scartati) log(`🧹 ${scartati} prezzi inaffidabili scartati in tutto`);
   return stazioni.filter((s) => Object.keys(s.prezzi).length > 0);
 }
 
@@ -160,7 +181,10 @@ function costruisciAlbero(stazioni) {
       pr.comuni.set(s.comuneMimit, { nome, slug: slug(nome), provincia: pr, stazioni: [] });
     }
     const c = pr.comuni.get(s.comuneMimit);
-    c.stazioni.push(s); pr.stazioni.push(s); r.stazioni.push(s);
+    c.stazioni.push(s);
+    // Zone extradoganali (Livigno): prezzi veri ma non paragonabili, quindi
+    // solo nella pagina del comune, fuori da minimi e medie di provincia e regione
+    if (!ZONE_FRANCHE.has(s.comuneMimit)) { pr.stazioni.push(s); r.stazioni.push(s); }
     s.comune = c;
   }
   if (ignorate) log(`ℹ️  ${ignorate} distributori con sigla di provincia sconosciuta ignorati`);
@@ -416,7 +440,10 @@ ${c.vicini.map((o) => `      <a href="${o.url}">${esc(o.nome)}${o.stat.diesel_se
     <p class="nota">Prezzo più basso del diesel self di oggi.</p>
   </section>` : '';
 
-  const corpo = `${riepilogo(st, p.stat, 'della provincia')}
+  const notaZona = ZONE_FRANCHE.has(c.stazioni[0]?.comuneMimit)
+    ? `  <p class="nota" style="margin:0 0 14px">${esc(c.nome)} è zona extradoganale: il carburante costa per legge molto meno che nel resto d'Italia, per questo i suoi prezzi non sono confrontati con la media della provincia.</p>\n`
+    : '';
+  const corpo = `${notaZona}${riepilogo(st, notaZona ? null : p.stat, 'della provincia')}
 ${sezioniPrezzi(st, ora, luogo)}
     <p class="altri"><a href="#app">Vedi tutti ${c.stazioni.length === 1 ? 'i distributori' : `i ${c.stazioni.length} distributori`} sulla mappa nell'app →</a></p>
 ${vicini}
