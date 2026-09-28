@@ -118,9 +118,9 @@ function preparaStazioni(grezze) {
 
 /**
  * Scarta i prezzi inaffidabili, così non compaiono mai come "il più economico":
- *  • errori dei gestori: più del 15% sotto la mediana italiana della stessa voce
- *    (20% per GPL e metano, che variano di più) o più del 25% sopra.
- *    Esempio: con il diesel self a 2,36 di mediana, sotto 2,00 si scarta.
+ *  • errori dei gestori o prezzi di prima di un rincaro: più del 10% sotto la
+ *    mediana italiana della stessa voce (15% per GPL e metano, che variano di
+ *    più) o più del 25% sopra. Esempio: diesel self a 2,36 di mediana → sotto 2,12 si scarta.
  *  • Livigno è esclusa dal controllo: è zona extradoganale e lì il carburante
  *    costa davvero molto meno.
  * I prezzi più vecchi di GIORNI_MAX sono già esclusi in preparaStazioni().
@@ -133,7 +133,7 @@ function scartaAnomali(stazioni) {
       .map((s) => s.prezzi[voce].prezzo).sort((a, b) => a - b);
     if (valori.length < 20) continue;
     const mediana = valori[Math.floor(valori.length / 2)];
-    const sotto = voce === 'gpl' || voce === 'metano' ? 0.80 : 0.85;
+    const sotto = voce === 'gpl' || voce === 'metano' ? 0.85 : 0.90;
     const min = mediana * sotto, max = mediana * 1.25;
     let qui = 0;
     for (const s of stazioni) {
@@ -349,8 +349,8 @@ ${['diesel_self', 'benzina_self', 'gpl', 'metano'].map((v) => {
     }
     return `    <a class="scheda carb" href="#${v}">
       <small>${info.nome}</small>
-      <b class="num">${prezzo(s.min)} <i>${info.unita}</i></b>
-      <div class="media num">${s.n === 1 ? '1 distributore' : `media ${prezzo(s.media)}`}</div>
+      <b class="num">${prezzo(s.n === 1 ? s.min : s.media)} <i>${info.unita}</i></b>
+      <div class="media num">${s.n === 1 ? '1 distributore' : `prezzo medio · il più economico <strong>${prezzo(s.min)}</strong>`}</div>
       ${statRif ? confronto(s.media, statRif[v].media, doveRif) : ''}
     </a>`;
   }).join('\n')}
