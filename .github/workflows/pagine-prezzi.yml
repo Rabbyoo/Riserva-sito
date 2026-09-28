@@ -1,7 +1,7 @@
 # =============================================================================
 #  Pubblicazione del sito riservapp.it con le pagine "Prezzi oggi a <comune>"
 # =============================================================================
-#  Due volte al giorno, mezz'ora dopo l'aggiornamento dei prezzi (repository
+#  Cinque volte al giorno, mezz'ora dopo l'aggiornamento dei prezzi (repository
 #  dell'app, "Sync prezzi MIMIT"), e a ogni modifica dei file del sito:
 #    1. il generatore crea le pagine di comuni, province e regioni + sitemap
 #    2. GitHub pubblica tutto su riservapp.it
@@ -21,8 +21,9 @@ name: Pubblica sito e pagine prezzi
 
 on:
   schedule:
-    - cron: '50 6 * * *'    # 08:50 ora italiana (estate) / 07:50 (inverno)
-    - cron: '50 13 * * *'   # 15:50 / 14:50
+    # mezz'ora dopo ogni controllo dei prezzi (ora italiana estiva
+    # 08:50, 10:50, 12:50, 15:50, 18:50; inverno un'ora prima)
+    - cron: '50 6,8,10,13,16 * * *'
   push:
     branches: [main]
   workflow_dispatch:
